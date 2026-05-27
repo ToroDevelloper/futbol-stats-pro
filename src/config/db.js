@@ -5,14 +5,19 @@ const connectionString =
   process.env.DATABASE_URL ||
   'postgresql://postgres:password123@db_futbol:5432/futbol_db';
 
+const caCert = process.env.PG_CA_CERT
+  ? process.env.PG_CA_CERT.replace(/\\n/g, '\n').trim()
+  : undefined;
+
 const shouldUseSsl =
   process.env.NODE_ENV === 'production' ||
   /sslmode=require/i.test(connectionString) ||
+  /sslmode=verify-full/i.test(connectionString) ||
   process.env.PGSSLMODE === 'require';
 
 const sslConfig = shouldUseSsl
-  ? process.env.PG_CA_CERT
-    ? { rejectUnauthorized: true, ca: process.env.PG_CA_CERT }
+  ? caCert
+    ? { rejectUnauthorized: true, ca: caCert }
     : { rejectUnauthorized: false }
   : false;
 
