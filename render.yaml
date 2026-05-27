@@ -1,8 +1,3 @@
-databases:
-  - name: futbol-stats-db
-    databaseName: futbol_db
-    user: futbol_user
-
 services:
   - type: web
     name: futbol-stats-api
@@ -16,6 +11,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: futbol-stats-db
-          property: connectionString
+        sync: false
+      - key: PG_CA_CERT
+        sync: false
