@@ -1,12 +1,12 @@
 # FutbolStats Pro API
 
-API REST en Node.js/Express para consultar tabla de posiciones de fútbol con PostgreSQL, lista para ejecución local con Docker, integración continua con GitHub Actions y despliegue en Render usando Blueprint.
+API REST en Node.js/Express para consultar tabla de posiciones de fútbol con PostgreSQL, lista para ejecución local con Docker, integración continua con GitHub Actions y despliegue en Render (solo API) con base de datos externa en Aiven.
 
 ## Arquitectura
 
 El flujo completo está documentado en [`arquitectura.png`](./arquitectura.png):
 
-`Máquina local -> GitHub Actions (CI) -> Render Web Service + Render PostgreSQL`
+`Máquina local -> GitHub Actions (CI) -> Render Web Service -> Aiven PostgreSQL`
 
 ## Tecnologías
 
@@ -56,16 +56,23 @@ Incluye:
 - Instalación con `pnpm install --frozen-lockfile`.
 - Ejecución de `pnpm test`.
 
-## Despliegue en Render
+## Despliegue en Render + Aiven
 
 Archivo: `render.yaml`
 
 Incluye:
-- Base de datos PostgreSQL gestionada por Render.
-- Web Service Node.js.
+- Web Service Node.js en Render.
 - `healthCheckPath: /api/health`
 - `autoDeployTrigger: checksPass` (despliegue automático después de CI en verde).
-- Inyección de `DATABASE_URL` desde la base de datos de Render.
+- Variables manuales en Render:
+  - `DATABASE_URL` (URI de Aiven con `sslmode=require`)
+  - `PG_CA_CERT` (opcional, recomendado: certificado CA de Aiven)
+
+Ejemplo de `DATABASE_URL`:
+
+```txt
+postgres://USER:PASSWORD@HOST:PORT/defaultdb?sslmode=require
+```
 
 ## Estructura principal
 
