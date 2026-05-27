@@ -2,6 +2,7 @@ services:
   - type: web
     name: futbol-stats-api
     runtime: node
+    plan: free
     region: oregon
     autoDeployTrigger: checksPass
     buildCommand: corepack enable && pnpm install --frozen-lockfile
