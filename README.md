@@ -1,14 +1,16 @@
 # FutbolStats Pro API
 
-API REST en Node.js/Express para consultar tabla de posiciones de fútbol con PostgreSQL, lista para ejecución local con Docker, integración continua con GitHub Actions y despliegue en Render (solo API) con base de datos externa en Aiven.
+API REST en Node.js/Express para consultar tabla de posiciones de futbol con PostgreSQL. El proyecto esta preparado para desarrollo local con Docker, pruebas con Jest, CI en GitHub Actions y despliegue completo en Render con Web Service + Render PostgreSQL.
 
 ## Arquitectura
 
-El flujo completo está documentado en [`arquitectura.png`](./arquitectura.png):
+El flujo esta documentado en [`arquitectura.png`](./arquitectura.png):
 
-`Máquina local -> GitHub Actions (CI) -> Render Web Service -> Aiven PostgreSQL`
+```txt
+Maquina local -> GitHub Actions (CI) -> Render Web Service + Render PostgreSQL
+```
 
-## Tecnologías
+## Tecnologias
 
 - Node.js 24
 - Express 5
@@ -20,71 +22,52 @@ El flujo completo está documentado en [`arquitectura.png`](./arquitectura.png):
 
 ## Endpoints
 
-- `GET /api/health`  
-  Verifica estado de la API y conectividad a PostgreSQL.
+- `GET /api/health`: liveness check de la API para Render.
+- `GET /api/health/db`: readiness check de conexion a PostgreSQL.
+- `GET /api/posiciones`: tabla de posiciones ordenada por puntos y diferencia de goles.
 
-- `GET /api/posiciones`  
-  Retorna la tabla de posiciones ordenada por puntos y diferencia de goles.
-
-## Ejecución local
-
-1. Levantar infraestructura:
+## Ejecucion local
 
 ```bash
 docker compose up -d --build
 ```
 
-2. Probar salud:
-
 ```bash
 curl http://localhost:3000/api/health
+curl http://localhost:3000/api/health/db
 ```
-
-3. Ejecutar tests:
 
 ```bash
 pnpm test
 ```
 
-## CI (GitHub Actions)
+## CI
 
-Workflow: `.github/workflows/ci.yml`
+El workflow `.github/workflows/ci.yml` levanta un PostgreSQL temporal, instala dependencias con pnpm y ejecuta la suite Jest con `NODE_ENV=test`.
 
-Incluye:
-- Servicio temporal de PostgreSQL.
-- Variables `NODE_ENV=test` y `DATABASE_URL`.
-- Instalación con `pnpm install --frozen-lockfile`.
-- Ejecución de `pnpm test`.
+## Despliegue en Render
 
-## Despliegue en Render + Aiven
+El archivo `render.yaml` define:
 
-Archivo: `render.yaml`
+- Web Service Node.js en plan free.
+- Render PostgreSQL en plan free.
+- `DATABASE_URL` inyectada desde la base de datos Render con `fromDatabase`.
+- `healthCheckPath: /api/health`.
+- `autoDeployTrigger: checksPass`.
 
-Incluye:
-- Web Service Node.js en Render.
-- `healthCheckPath: /api/health`
-- `autoDeployTrigger: checksPass` (despliegue automático después de CI en verde).
-- Variables manuales en Render:
-  - `DATABASE_URL` (URI de Aiven con `sslmode=require`)
-  - `PG_CA_CERT` (opcional, recomendado: certificado CA de Aiven)
+No se requiere configurar una base externa ni variables manuales para la base de datos.
 
-Ejemplo de `DATABASE_URL`:
-
-```txt
-postgres://USER:PASSWORD@HOST:PORT/defaultdb?sslmode=require
-```
-
-## Estructura principal
+## Estructura
 
 ```txt
 .
-├── .github/workflows/ci.yml
-├── Dockerfile
-├── docker-compose.yml
-├── render.yaml
-├── arquitectura.png
-├── src/
-│   ├── app.js
-│   └── config/db.js
-└── tests/app.test.js
+|-- .github/workflows/ci.yml
+|-- Dockerfile
+|-- docker-compose.yml
+|-- render.yaml
+|-- arquitectura.png
+|-- src/
+|   |-- app.js
+|   `-- config/db.js
+`-- tests/app.test.js
 ```
