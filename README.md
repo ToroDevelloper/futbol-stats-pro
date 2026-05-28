@@ -1,5 +1,7 @@
 # FutbolStats Pro API
 
+> Nota importante: este repositorio tuvo varios commits y redeploys porque al inicio hubo una confusion con el plan de Render. Primero se penso que Render estaba cobrando el despliegue porque no se habia declarado correctamente `plan: free` en el `render.yaml`, y por eso se asumio que no se podia usar PostgreSQL gratis en Render. Luego se migró temporalmente a Aiven, donde aparecieron problemas de certificado SSL. Despues de investigar mejor los beneficios gratuitos de Render, se corrigio el Blueprint para usar Web Service + PostgreSQL en plan free y se volvio a la ruta original.
+
 API REST en Node.js/Express para consultar tabla de posiciones de futbol con PostgreSQL. El proyecto esta preparado para desarrollo local con Docker, pruebas con Jest, CI en GitHub Actions y despliegue completo en Render con Web Service + Render PostgreSQL.
 
 ## Arquitectura
