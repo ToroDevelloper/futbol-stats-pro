@@ -16,7 +16,7 @@ const shouldUseSsl =
   process.env.PGSSLMODE === 'require';
 
 const sslConfig = shouldUseSsl
-  ? caCert
+  ? caCert && process.env.PG_STRICT_SSL === 'true'
     ? { rejectUnauthorized: true, ca: caCert }
     : { rejectUnauthorized: false }
   : false;
